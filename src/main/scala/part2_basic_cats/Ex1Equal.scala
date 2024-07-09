@@ -14,7 +14,8 @@ object Ex1Equal extends App {
   // 1. define the type class: cats already defined the type class so import
   import cats.Eq
 
-  // 2. create implicit instance of type class that you need: cats already defined so import
+  // 2. create implicit instance of type class that you need:
+  // cats already defined for basic types so import
   import cats.instances.int._
 
   // 3. offer some api to use this type class: here apis is already created by cat so use it

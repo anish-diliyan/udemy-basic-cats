@@ -1,5 +1,7 @@
 package type_classes.exercise
 
+import cats.Eq
+
 case class Person(name: String, id: Int)
 
 object Person {

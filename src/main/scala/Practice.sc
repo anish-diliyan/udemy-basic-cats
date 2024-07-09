@@ -1,69 +1,23 @@
-import org.scalacheck.Arbitrary
-import org.typelevel.discipline.Laws
-import org.scalacheck.Prop._
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.prop.Configuration
-import org.typelevel.discipline.scalatest.FunSuiteDiscipline
+// Step 1:  create a type class
+trait MyEqual[T] {
+  def ===(obj1: T, obj2: T): Boolean
+}
 
-import java.nio.ByteBuffer
+case class Person(name: String, age: Int)
 
-object Tests {
-  trait ByteDecoder[A]{
-    def decode(bytes:Array[Byte]): Option[A]
-  }
-
-  trait ByteEncoder[A] {
-    def encode(o:A): Array[Byte]
-  }
-
-  trait ByteCodec[A] extends ByteDecoder[A] with ByteEncoder[A]
-
-  trait ByteCodecLaws[A]{
-    def codec: ByteCodec[A]
-
-    def isomorphism(o:A): Boolean =
-      codec.decode(codec.encode(o)).contains(o)
-  }
-
-  trait ByteCodecTests[A] extends Laws {
-    def laws: ByteCodecLaws[A]
-
-    def byteCodec(implicit arb: Arbitrary[A]): RuleSet = new DefaultRuleSet(
-      "byteCodec",
-      parent = None,
-      props = "isomorphism" -> forAll(laws.isomorphism _)
-    )
-  }
-
-  implicit object IntByteCodec extends ByteCodec[Int] {
-    override def decode(bytes: Array[Byte]): Option[Int] = {
-      if(bytes.length != 4) None
-      else {
-        val bb = ByteBuffer.allocate(4)
-        bb.put(bytes)
-        bb.flip()
-        Some(bb.getInt)
-      }
-    }
-
-    override def encode(o: Int): Array[Byte] = {
-      val bb = ByteBuffer.allocate(4)
-      bb.putInt(o)
-      bb.array()
-    }
-  }
-
-  object IntByteCodecLaws extends ByteCodecLaws[Int] {
-    override def codec: ByteCodec[Int] = IntByteCodec
-  }
-
-  object IntByteCodecTests extends ByteCodecTests[Int] {
-    override def laws: ByteCodecLaws[Int] = IntByteCodecLaws
+// Step 2: create instance of type class for the type Person
+implicit object FullEquality extends MyEqual[Person] {
+  override def ===(obj1: Person, obj2: Person): Boolean = {
+    obj1.name == obj2.name && obj1.age == obj2.age
   }
 }
 
-import Tests._
-
-class ByteCodecSpec extends AnyFunSuite with Configuration with FunSuiteDiscipline {
-  checkAll("ByteCodec[Int]", IntByteCodecTests.byteCodec)
+// Step 3: expose method to get instance of MyEqual[Person] type class
+object MyEqual{
+  def apply[T](implicit instance: MyEqual[T]): MyEqual[T] = instance
 }
+
+val anish = Person("anish", 30)
+val manish = Person("manish", 25)
+
+MyEqual[Person].===(anish, manish)

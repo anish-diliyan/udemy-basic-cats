@@ -1,4 +1,6 @@
-package type_classes.exercise
+package part1_type_classes.exercise
+
+import type_classes.exercise.Person
 
 trait Eq[A] {
   def eq(obj1: A, obj2: A): Boolean

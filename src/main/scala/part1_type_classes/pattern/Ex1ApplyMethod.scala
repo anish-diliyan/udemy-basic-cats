@@ -1,4 +1,4 @@
-package type_classes.pattern
+package part1_type_classes.pattern
 
 import type_classes.pattern.EqualTypeClass.{Equal, User}
 
